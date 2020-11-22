@@ -330,6 +330,12 @@ function commitBeforeMutationLifeCycles(
   );
 }
 
+/**
+ * 执行useLayoutEffect钩子的销毁函数
+ * 关键在于tag的类型
+ * @param {*} tag 
+ * @param {*} finishedWork 
+ */
 function commitHookEffectListUnmount(tag: number, finishedWork: Fiber) {
   const updateQueue: FunctionComponentUpdateQueue | null = (finishedWork.updateQueue: any);
   const lastEffect = updateQueue !== null ? updateQueue.lastEffect : null;
@@ -498,6 +504,8 @@ function commitLifeCycles(
       ) {
         try {
           startLayoutEffectTimer();
+          
+          // 执行useLayoutEffect的回调函数
           commitHookEffectListMount(HookLayout | HookHasEffect, finishedWork);
         } finally {
           recordLayoutEffectDuration(finishedWork);
@@ -506,13 +514,14 @@ function commitLifeCycles(
         commitHookEffectListMount(HookLayout | HookHasEffect, finishedWork);
       }
 
+      // 存储useEffect的回调函数和销毁函数，并开启一次调度
       schedulePassiveEffects(finishedWork);
       return;
     }
     case ClassComponent: {
       const instance = finishedWork.stateNode;
       if (finishedWork.flags & Update) {
-        if (current === null) {
+        if (current === null) { // 判断是mount还是update
           // We could update instance props and state here,
           // but instead we rely on them being set during last render.
           // TODO: revisit this when we implement resuming.
@@ -654,6 +663,9 @@ function commitLifeCycles(
         // We could update instance props and state here,
         // but instead we rely on them being set during last render.
         // TODO: revisit this when we implement resuming.
+
+        // setState方法的第二个参数会保存在ClassComponent对应的fiber节点的updateQueue中
+        // 会在这里调用
         commitUpdateQueue(finishedWork, updateQueue, instance);
       }
       return;
@@ -847,6 +859,10 @@ function hideOrUnhideAllChildren(finishedWork, isHidden) {
   }
 }
 
+/**
+ * 给ref赋值
+ * @param {*} finishedWork 
+ */
 function commitAttachRef(finishedWork: Fiber) {
   const ref = finishedWork.ref;
   if (ref !== null) {
@@ -944,6 +960,9 @@ function commitUnmount(
             const {destroy, tag} = effect;
             if (destroy !== undefined) {
               if ((tag & HookPassive) !== NoHookEffect) {
+                /**
+                 * 将需要销毁节点的useEffect存储起来，开启调度程序，异步执行
+                 */
                 enqueuePendingPassiveHookEffectUnmount(current, effect);
               } else {
                 if (
@@ -955,6 +974,9 @@ function commitUnmount(
                   safelyCallDestroy(current, destroy);
                   recordLayoutEffectDuration(current);
                 } else {
+                  /**
+                   * deletion的时候，useLayoutEffect的销毁函数在这里执行
+                   */
                   safelyCallDestroy(current, destroy);
                 }
               }
@@ -1019,6 +1041,13 @@ function commitUnmount(
   }
 }
 
+/**
+ * 给当前节点嵌套的所有字节点执行commitUnmount
+ * 
+ * @param {*} finishedRoot 
+ * @param {*} root 
+ * @param {*} renderPriorityLevel 
+ */
 function commitNestedUnmounts(
   finishedRoot: FiberRoot,
   root: Fiber,
@@ -1208,7 +1237,7 @@ function commitPlacement(finishedWork: Fiber): void {
   }
 
   // Recursively insert all host nodes into the parent.
-  const parentFiber = getHostParentFiber(finishedWork);
+  const parentFiber = getHostParentFiber(finishedWork); // 确保parentFilber的stateNode是一个dom节点
 
   // Note: these two variables *must* always be updated together.
   let parent;
@@ -1219,8 +1248,8 @@ function commitPlacement(finishedWork: Fiber): void {
       parent = parentStateNode;
       isContainer = false;
       break;
-    case HostRoot:
-      parent = parentStateNode.containerInfo;
+    case HostRoot: // RootFiber
+      parent = parentStateNode.containerInfo; // 获取挂载节点
       isContainer = true;
       break;
     case HostPortal:
@@ -1240,6 +1269,7 @@ function commitPlacement(finishedWork: Fiber): void {
           'in React. Please file an issue.',
       );
   }
+  // 更新节点的文本
   if (parentFiber.flags & ContentReset) {
     // Reset the text content of the parent before doing any insertions
     resetTextContent(parent);
@@ -1336,6 +1366,9 @@ function unmountHostComponents(
   let currentParent;
   let currentParentIsContainer;
 
+  /**
+   * 递归查找父级DOM节点
+   */
   while (true) {
     if (!currentParentIsValid) {
       let parent = node.return;
@@ -1374,6 +1407,9 @@ function unmountHostComponents(
       commitNestedUnmounts(finishedRoot, node, renderPriorityLevel);
       // After all the children have unmounted, it is now safe to remove the
       // node from the tree.
+      /**
+       * 删除节点
+       */
       if (currentParentIsContainer) {
         removeChildFromContainer(
           ((currentParent: any): Container),

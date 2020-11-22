@@ -93,6 +93,9 @@ export function createFiberRoot(
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
+  /**
+   * 初始化的时候，在创建FiberRootNode的时候，同时创建了一个RootFiber,用来表示当前Fiber树的根节点
+   */
   const uninitializedFiber = createHostRootFiber(tag);
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;

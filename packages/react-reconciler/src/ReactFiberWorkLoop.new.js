@@ -531,6 +531,7 @@ export function scheduleUpdateOnFiber(
   checkForNestedUpdates();
   warnAboutRenderPhaseUpdatesInDEV(fiber);
 
+  // 入参fiber是RootFiber,这个root返回的是FiberRootNode
   const root = markUpdateLaneFromFiberToRoot(fiber, lane);
   if (root === null) {
     warnAboutUpdateOnUnmountedFiberInDEV(fiber);
@@ -1359,6 +1360,9 @@ function prepareFreshStack(root: FiberRoot, lanes: Lanes) {
       interruptedWork = interruptedWork.return;
     }
   }
+  /**
+   * 创建workInProgress树的RootFiber节点
+   */
   workInProgressRoot = root;
   workInProgress = createWorkInProgress(root.current, null);
   workInProgressRootRenderLanes = subtreeRenderLanes = workInProgressRootIncludedLanes = lanes;
@@ -2053,6 +2057,11 @@ function commitRootImpl(root, renderPriorityLevel) {
     shouldFireAfterActiveInstanceBlur = false;
 
     nextEffect = firstEffect;
+    /**
+     * commit阶段-beforeMutation
+     * 1. 执行ClassComponent中的 getSnapshotBeforeUpdate 生命周期函数
+     * 2. 调度useEffect回调函数和销毁函数，异步调度，并不是立即执行
+     */
     do {
       if (__DEV__) {
         invokeGuardedCallback(null, commitBeforeMutationEffects, null);
@@ -2090,6 +2099,27 @@ function commitRootImpl(root, renderPriorityLevel) {
 
     // The next phase is the mutation phase, where we mutate the host tree.
     nextEffect = firstEffect;
+    /**
+     * commit阶段-mutation(**Function组件中一旦有useEffect或者useLayout，对应的fiber的flags就会有Update)
+     * 1. 更新文本节点
+     * 2. 更新ref
+     * 3. 执行flags(Placement | Update | Deletion)
+     * 
+     * Placement：
+     * 1. 获取父级的DOM节点，需要一直向上查找，直到找出stateNode是DOM元素的节点或者根DOM节点
+     * 2. 获取兄弟DOM节点
+     * 3. 根据兄弟节点是否存在来决定是appendChild还是insertBefore
+     * 
+     * Update:
+     * 1. 对于FunctionComponent 执行UseLayoutEffect钩子的销毁函数
+     * 2. 对于HostComponent 执行commitUpdate 更新updateQueue中存储的更新
+     * 
+     * Deletion:
+     * 1. 递归给当前fiber节点和其子孙节点执行commitUnmount().ClassComponent执行componentWillUnmount
+     *    生命周期；对于FunctionComponent则是将useEffect的销毁函数暂存起来，然后开启一次异步调度
+     * 2. 删除对应的DOM节点
+     * 3. 在Deletion中为什么没有执行useLayoutEffect的销毁函数 （？？？）(是有执行的)
+     */
     do {
       if (__DEV__) {
         invokeGuardedCallback(
@@ -2125,12 +2155,21 @@ function commitRootImpl(root, renderPriorityLevel) {
     // the mutation phase, so that the previous tree is still current during
     // componentWillUnmount, but before the layout phase, so that the finished
     // work is current during componentDidMount/Update.
-    root.current = finishedWork;
+    root.current = finishedWork; // 切换workInProgressTree 为 currentTree
+    // 这里之所以在layout之前切换，是因为didMount生命周期要取到最新的stateNode
+    // 而willUnmount需要取到上一次的stateNode
 
     // The next phase is the layout phase, where we call effects that read
     // the host tree after it's been mutated. The idiomatic use case for this is
     // layout, but class component lifecycles also fire here for legacy reasons.
     nextEffect = firstEffect;
+
+    /**
+     * commit节点-layout
+     * 1. ClassComponent-执行对应的生命周期，componentDidMount或componentDidUpdate
+     *    FunctionComponent-同步执行useLayoutEffect的回调函数，调度useEffect的回调函数和销毁函数
+     * 2. 更新ref
+     */
     do {
       if (__DEV__) {
         invokeGuardedCallback(null, commitLayoutEffects, null, root, lanes);
@@ -2183,11 +2222,12 @@ function commitRootImpl(root, renderPriorityLevel) {
 
   const rootDidHavePassiveEffects = rootDoesHavePassiveEffects;
 
+  // 判断是否有useEffect的副作用，如果有的话才执行
   if (rootDoesHavePassiveEffects) {
     // This commit has passive effects. Stash a reference to them. But don't
     // schedule a callback until after flushing layout work.
     rootDoesHavePassiveEffects = false;
-    rootWithPendingPassiveEffects = root;
+    rootWithPendingPassiveEffects = root; // 调度useEffect回调函数和销毁函数的开关，只有这里打开才能执行
     pendingPassiveEffectsLanes = lanes;
     pendingPassiveEffectsRenderPriority = renderPriorityLevel;
   } else {
@@ -2453,6 +2493,7 @@ function commitLayoutEffects(root: FiberRoot, committedLanes: Lanes) {
 
     if (flags & (Update | Callback)) {
       const current = nextEffect.alternate;
+      // 执行对应的生命周期
       commitLayoutEffectOnFiber(root, current, nextEffect, committedLanes);
     }
 
@@ -2464,6 +2505,11 @@ function commitLayoutEffects(root: FiberRoot, committedLanes: Lanes) {
       }
     } else {
       if (flags & Ref) {
+        /**
+         * 这里虽然didMount是在ref赋值前调用的
+         * 但是didMount中只能去掉子级fiber的stateNode，所以顺序是没有问题的
+         * （容易想错）
+         */
         commitAttachRef(nextEffect);
       }
     }
