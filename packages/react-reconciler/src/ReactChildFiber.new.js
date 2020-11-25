@@ -1100,6 +1100,9 @@ function ChildReconciler(shouldTrackSideEffects) {
     while (child !== null) {
       // TODO: If key === null and child.key === null, then this only applies to
       // the first item in the list.
+      /**
+       * 单节点diff
+       */
       if (child.key === key) {
         switch (child.tag) {
           case Fragment: {
@@ -1124,7 +1127,7 @@ function ChildReconciler(shouldTrackSideEffects) {
                 : false)
             ) {
               deleteRemainingChildren(returnFiber, child.sibling);
-              const existing = useFiber(child, element.props);
+              const existing = useFiber(child, element.props); // 复用上一次的fiber中的一些属性，包括stateNode
               existing.ref = coerceRef(returnFiber, child, element);
               existing.return = returnFiber;
               if (__DEV__) {

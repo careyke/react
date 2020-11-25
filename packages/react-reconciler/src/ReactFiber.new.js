@@ -587,7 +587,7 @@ export function createFiberFromElement(
   }
   const type = element.type;
   const key = element.key;
-  const pendingProps = element.props;
+  const pendingProps = element.props;// 当前节点最新的Props
   const fiber = createFiberFromTypeAndProps(
     type,
     key,
