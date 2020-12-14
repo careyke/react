@@ -711,6 +711,11 @@ function completeWork(
           markRef(workInProgress);
         }
       } else {
+        /**
+         * 将新增的节点对应的真实DOM节点组装成一个DOM子树
+         * 但是这个子树在Reconciler节点不加入DOM组数中
+         * 而是在Commit阶段再加入
+         */
         if (!newProps) {
           invariant(
             workInProgress.stateNode !== null,

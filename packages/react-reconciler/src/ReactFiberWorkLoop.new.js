@@ -1701,6 +1701,7 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   }
 
   resetCurrentDebugFiberInDEV();
+  // 表示pendingProps已经被消费
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   if (next === null) {
     // If this doesn't spawn new work, complete the current work.
