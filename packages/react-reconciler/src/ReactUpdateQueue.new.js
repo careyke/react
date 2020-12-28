@@ -195,6 +195,13 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
   return update;
 }
 
+/**
+ * 新生成的update排队进入updateQueue
+ * pending是一个有环的有序链表，pengding指向的是最新加入的update
+ * C -> A -> B -> C
+ * @param {*} fiber 
+ * @param {*} update 
+ */
 export function enqueueUpdate<State>(fiber: Fiber, update: Update<State>) {
   const updateQueue = fiber.updateQueue;
   if (updateQueue === null) {
@@ -433,6 +440,8 @@ export function processUpdateQueue<State>(
     // lists and take advantage of structural sharing.
     // TODO: Pass `current` as argument
     const current = workInProgress.alternate;
+
+    // 在current Fiber中也保存一份未执行的update
     if (current !== null) {
       // This is always non-null on a ClassComponent or HostRoot
       const currentQueue: UpdateQueue<State> = (current.updateQueue: any);
@@ -490,6 +499,7 @@ export function processUpdateQueue<State>(
         // This update does have sufficient priority.
 
         if (newLastBaseUpdate !== null) {
+          // 一个update被跳过，后面所有的都会跳过
           const clone: Update<State> = {
             eventTime: updateEventTime,
             // This update is going to be committed so we never want uncommit
@@ -517,9 +527,11 @@ export function processUpdateQueue<State>(
         );
         const callback = update.callback;
         if (callback !== null) {
+          // callback需要放在commit阶段处理
           workInProgress.flags |= Callback;
           const effects = queue.effects;
           if (effects === null) {
+            // effects中保存 存在callback的update
             queue.effects = [update];
           } else {
             effects.push(update);

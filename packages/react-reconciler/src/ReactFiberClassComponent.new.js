@@ -190,6 +190,9 @@ export function applyDerivedStateFromProps(
   }
 }
 
+/**
+ * ClassComponent的更新器
+ */
 const classComponentUpdater = {
   isMounted,
   enqueueSetState(inst, payload, callback) {
@@ -560,6 +563,11 @@ function checkClassInstance(workInProgress: Fiber, ctor: any, newProps: any) {
   }
 }
 
+/**
+ * 代理ClassComponent的更新器
+ * @param {*} workInProgress 
+ * @param {*} instance 
+ */
 function adoptClassInstance(workInProgress: Fiber, instance: any): void {
   instance.updater = classComponentUpdater;
   workInProgress.stateNode = instance;
