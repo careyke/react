@@ -302,6 +302,8 @@ function commitBeforeMutationLifeCycles(
               );
             }
           }
+          // 这里保存getSnapshotBeforeUpdate的返回结果
+          // 调用componentDidUpdate的时候需要使用
           instance.__reactInternalSnapshotBeforeUpdate = snapshot;
         }
       }
@@ -1516,6 +1518,7 @@ function commitDeletion(
     // Detach refs and call componentWillUnmount() on the whole subtree.
     commitNestedUnmounts(finishedRoot, current, renderPriorityLevel);
   }
+  // 清空已经删除的Fiber
   const alternate = current.alternate;
   detachFiberMutation(current);
   if (alternate !== null) {

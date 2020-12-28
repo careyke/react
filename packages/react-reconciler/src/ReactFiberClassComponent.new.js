@@ -1101,6 +1101,7 @@ function updateClassInstance(
   ) {
     // If an update was already in progress, we should schedule an Update
     // effect even though we're bailing out, so that cWU/cDU are called.
+    // 这种场景还没有想到
     if (typeof instance.componentDidUpdate === 'function') {
       if (
         unresolvedOldProps !== current.memoizedProps ||
