@@ -423,6 +423,7 @@ export function processUpdateQueue<State>(
 
     // The pending queue is circular. Disconnect the pointer between first
     // and last so that it's non-circular.
+    // 剪环
     const lastPendingUpdate = pendingQueue;
     const firstPendingUpdate = lastPendingUpdate.next;
     lastPendingUpdate.next = null;
@@ -441,7 +442,7 @@ export function processUpdateQueue<State>(
     // TODO: Pass `current` as argument
     const current = workInProgress.alternate;
 
-    // 在current Fiber中也保存一份未执行的update
+    // 在current Fiber中也保存一份未执行的update，防止更新中断，数据丢失
     if (current !== null) {
       // This is always non-null on a ClassComponent or HostRoot
       const currentQueue: UpdateQueue<State> = (current.updateQueue: any);

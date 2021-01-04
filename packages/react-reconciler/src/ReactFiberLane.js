@@ -442,6 +442,7 @@ export function markStarvedLanesAsExpired(
       }
     } else if (expirationTime <= currentTime) {
       // This lane expired
+      // 标记当前任务的过期时间
       root.expiredLanes |= lane;
     }
 

@@ -647,6 +647,8 @@ function updateReducer<S, I, A>(
 
   queue.lastRenderedReducer = reducer;
 
+  // 这里会获取currentFiber中对应的hook对象，会将本次产生的更新保存一份
+  // 防止本次更新中断之后更新的数据丢失
   const current: Hook = (currentHook: any);
 
   // The last rebase update that is NOT part of the base state.

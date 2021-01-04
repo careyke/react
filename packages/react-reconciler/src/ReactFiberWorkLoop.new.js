@@ -531,7 +531,7 @@ export function scheduleUpdateOnFiber(
   checkForNestedUpdates();
   warnAboutRenderPhaseUpdatesInDEV(fiber);
 
-  // 入参fiber是RootFiber,这个root返回的是FiberRootNode
+  // 这个root返回的是FiberRootNode
   const root = markUpdateLaneFromFiberToRoot(fiber, lane);
   if (root === null) {
     warnAboutUpdateOnUnmountedFiberInDEV(fiber);
@@ -618,6 +618,8 @@ export function scheduleUpdateOnFiber(
         // scheduleCallbackForFiber to preserve the ability to schedule a callback
         // without immediately flushing it. We only do this for user-initiated
         // updates, to preserve historical behavior of legacy mode.
+        // 如果没有React的上下文，直接执行更新
+        // 可以看出Legacy模式中，是根据上下文来判断是都可以异步合并更新
         resetRenderTimer();
         flushSyncCallbackQueue();
       }
@@ -710,6 +712,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
 
   // Check if any lanes are being starved by other work. If so, mark them as
   // expired so we know to work on those next.
+  // 给当前更新标记过期时间，如果过期了，当前更新被中断会将当前更新保存在expiredLane中，会后面消费
   markStarvedLanesAsExpired(root, currentTime);
 
   // Determine the next lanes to work on, and their priority.
@@ -735,6 +738,8 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
     const existingCallbackPriority = root.callbackPriority;
     if (existingCallbackPriority === newCallbackPriority) {
       // The priority hasn't changed. We can reuse the existing task. Exit.
+      // 这里是异步批量更新的关键操作，所有模式都是在这里判断
+      // 通过比较两次任务的优先级，来判断是否合并
       return;
     }
     // The priority changed. Cancel the existing callback. We'll schedule a new

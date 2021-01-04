@@ -55,6 +55,7 @@ function siftUp(heap, node, i) {
   }
 }
 
+// 每pop一个元素，就构建一次小顶堆，保证index为0处的值是最小的
 function siftDown(heap, node, i) {
   let index = i;
   const length = heap.length;

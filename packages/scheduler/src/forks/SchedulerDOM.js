@@ -123,6 +123,7 @@ function advanceTimers(currentTime) {
       pop(timerQueue);
     } else if (timer.startTime <= currentTime) {
       // Timer fired. Transfer to the task queue.
+      // 将timerQueue中的超时任务放入taskQueue中
       pop(timerQueue);
       timer.sortIndex = timer.expirationTime;
       push(taskQueue, timer);
@@ -347,6 +348,7 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
       break;
   }
 
+  // 截止时间，防止任务饿死
   var expirationTime = startTime + timeout;
 
   var newTask = {
@@ -445,6 +447,9 @@ let deadline = 0;
 const maxYieldInterval = 300;
 let needsPaint = false;
 
+/**
+ * 判断是否需要中断
+ */
 function shouldYieldToHost() {
   if (
     enableIsInputPending &&
@@ -463,6 +468,7 @@ function shouldYieldToHost() {
       // regardless, since there could be a pending paint that wasn't
       // accompanied by a call to `requestPaint`, or other main thread tasks
       // like network events.
+      // isInputPending是chorme中的新api
       if (needsPaint || scheduling.isInputPending()) {
         // There is either a pending paint or a pending input.
         return true;
@@ -517,6 +523,8 @@ const performWorkUntilDeadline = () => {
     // Yield after `yieldInterval` ms, regardless of where we are in the vsync
     // cycle. This means there's always time remaining at the beginning of
     // the message event.
+
+    // 和浏览器约定，每帧只给5ms给React执行
     deadline = currentTime + yieldInterval;
     const hasTimeRemaining = true;
     try {
@@ -527,6 +535,7 @@ const performWorkUntilDeadline = () => {
       } else {
         // If there's more work, schedule the next message event at the end
         // of the preceding one.
+        // 当前帧没有执行完的任务 放到下一帧执行
         port.postMessage(null);
       }
     } catch (error) {
