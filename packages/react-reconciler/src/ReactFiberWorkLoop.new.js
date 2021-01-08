@@ -1752,6 +1752,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
         return;
       }
 
+      // 收集subtree剩余的更新任务，体现在childLanes中
       resetChildLanes(completedWork);
 
       if (
@@ -1852,6 +1853,12 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
   }
 }
 
+/**
+ * 在completeWork过程中，重置节点的childLanes
+ * 是一个从下向上的过程，此时本次更新的subtree已经生成完成，如果子节点还有lanes和childLanes
+ * 表明还有其他的更新任务需要做，收集在父节点上，依次向上传递，直到rootFiber
+ * @param {*} completedWork 
+ */
 function resetChildLanes(completedWork: Fiber) {
   if (
     // TODO: Move this check out of the hot path by moving `resetChildLanes`
@@ -1994,6 +2001,9 @@ function commitRootImpl(root, renderPriorityLevel) {
 
   // Update the first and last pending times on this root. The new first
   // pending time is whatever is left on the root fiber.
+
+  // finishedWork.lanes, finishedWork.childLanes还有值 表明还有未更新的任务
+  // 需要存在root.pindingLanes中，commit完成之后继续执行
   let remainingLanes = mergeLanes(finishedWork.lanes, finishedWork.childLanes);
   markRootFinished(root, remainingLanes);
 

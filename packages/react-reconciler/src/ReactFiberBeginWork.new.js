@@ -3230,6 +3230,8 @@ function beginWork(
   // the update queue. However, there's an exception: SimpleMemoComponent
   // sometimes bails out later in the begin phase. This indicates that we should
   // move this assignment out of the common path and into each branch.
+
+  // 这里清空了workInProgress.lanes，表明当前组件本次需要更新，会执行其中挂载的updateQueue
   workInProgress.lanes = NoLanes;
 
   switch (workInProgress.tag) {
