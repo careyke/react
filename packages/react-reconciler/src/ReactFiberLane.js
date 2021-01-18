@@ -319,6 +319,7 @@ export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
     getHighestPriorityLanes(wipLanes);
     const wipLanePriority = return_highestLanePriority;
     if (nextLanePriority <= wipLanePriority) {
+      // 同优先级运行时不打断，高优先级打断
       return wipLanes;
     } else {
       return_highestLanePriority = nextLanePriority;
@@ -514,6 +515,7 @@ export function findUpdateLane(
       if (lane === NoLane) {
         // If all the default lanes are already being worked on, look for a
         // lane in the transition range.
+        // 当前优先级的轨道已经占满，尝试降级处理
         lane = pickArbitraryLane(TransitionLanes & ~wipLanes);
         if (lane === NoLane) {
           // All the transition lanes are taken, too. This should be very
@@ -721,6 +723,11 @@ export function markRootMutableRead(root: FiberRoot, updateLane: Lane) {
   root.mutableReadLanes |= updateLane & root.pendingLanes;
 }
 
+/**
+ * 已执行的Update，清除root中对应的记录
+ * @param {*} root 
+ * @param {*} remainingLanes 
+ */
 export function markRootFinished(root: FiberRoot, remainingLanes: Lanes) {
   const noLongerPendingLanes = root.pendingLanes & ~remainingLanes;
 
