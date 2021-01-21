@@ -1937,6 +1937,11 @@ function resetChildLanes(completedWork: Fiber) {
 
 function commitRoot(root) {
   const renderPriorityLevel = getCurrentPriorityLevel();
+  /**
+   * 以最高优先级运行commit阶段
+   * 导致componentDidMount内部调用setState的时候，创建的Update也是最高优先级
+   * useEffect是异步的 所以不会
+   */
   runWithPriority(
     ImmediateSchedulerPriority,
     commitRootImpl.bind(null, root, renderPriorityLevel),

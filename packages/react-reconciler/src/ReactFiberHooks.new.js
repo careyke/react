@@ -386,6 +386,7 @@ export function renderWithHooks<Props, SecondArg>(
   let children = Component(props, secondArg);
 
   // Check if there was a render phase update
+  // 判断是否在组件render过程中有调用setState
   if (didScheduleRenderPhaseUpdateDuringThisPass) {
     // Keep rendering in a loop for as long as render phase updates continue to
     // be scheduled. Use a counter to prevent infinite loops.
@@ -416,6 +417,7 @@ export function renderWithHooks<Props, SecondArg>(
         hookTypesUpdateIndexDev = -1;
       }
 
+      // 切换处理器
       ReactCurrentDispatcher.current = __DEV__
         ? HooksDispatcherOnRerenderInDEV
         : HooksDispatcherOnRerender;
@@ -1752,12 +1754,15 @@ function dispatchAction<S, A>(
     // This is a render phase update. Stash it in a lazily-created map of
     // queue -> linked list of updates. After this render pass, we'll restart
     // and apply the stashed updates on top of the work-in-progress hook.
+    // 在FunctionComponent函数体中直接调用setState
+    // 优化处理 收归到本次更新中
     didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
   } else {
     if (
       fiber.lanes === NoLanes &&
       (alternate === null || alternate.lanes === NoLanes)
     ) {
+      // 优化处理
       // The queue is currently empty, which means we can eagerly compute the
       // next state before entering the render phase. If the new state is the
       // same as the current state, we may be able to bail out entirely.
