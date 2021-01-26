@@ -1280,6 +1280,7 @@ function updateEffectImpl(fiberFlags, hookFlags, create, deps): void {
     if (nextDeps !== null) {
       const prevDeps = prevEffect.deps;
       if (areHookInputsEqual(nextDeps, prevDeps)) {
+        // create每次都是更新的
         pushEffect(hookFlags, create, destroy, nextDeps);
         return;
       }
@@ -1289,6 +1290,7 @@ function updateEffectImpl(fiberFlags, hookFlags, create, deps): void {
   currentlyRenderingFiber.flags |= fiberFlags;
 
   hook.memoizedState = pushEffect(
+    // 当前effect如果本次update之后需要执行，Effect就需要加上HookHasEffect tag
     HookHasEffect | hookFlags,
     create,
     destroy,

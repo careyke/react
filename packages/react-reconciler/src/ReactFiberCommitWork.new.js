@@ -418,7 +418,7 @@ function schedulePassiveEffects(finishedWork: Fiber) {
       const {next, tag} = effect;
       if (
         (tag & HookPassive) !== NoHookEffect &&
-        (tag & HookHasEffect) !== NoHookEffect
+        (tag & HookHasEffect) !== NoHookEffect // HookHasEffect这个flag用判断本次update是否需要执行该副作用
       ) {
         enqueuePendingPassiveHookEffectUnmount(finishedWork, effect);
         enqueuePendingPassiveHookEffectMount(finishedWork, effect);
