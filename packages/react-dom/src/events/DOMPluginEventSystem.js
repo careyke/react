@@ -381,6 +381,12 @@ const listeningMarker =
     .toString(36)
     .slice(2);
 
+/**
+ * 创建所有支持的原生事件
+ * 除了selectionchange事件是绑定在document节点上
+ * 其他事件都是绑定在root节点上
+ * @param {*} rootContainerElement 
+ */
 export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
   if (!(rootContainerElement: any)[listeningMarker]) {
     (rootContainerElement: any)[listeningMarker] = true;
