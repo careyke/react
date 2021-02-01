@@ -171,6 +171,7 @@ function registerSimplePluginEventsAndSetTheirPriorities(
     const event = ((eventTypes[i + 1]: any): string);
     const capitalizedEvent = event[0].toUpperCase() + event.slice(1);
     const reactName = 'on' + capitalizedEvent;
+    // 记录原生事件对应的优先级
     eventPriorities.set(topEvent, priority);
     topLevelEventsToReactNames.set(topEvent, reactName);
     registerTwoPhaseEvent(reactName, [topEvent]);
