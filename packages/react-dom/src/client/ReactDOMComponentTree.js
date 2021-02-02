@@ -43,6 +43,12 @@ const internalEventHandlersKey = '__reactEvents$' + randomKey;
 const internalEventHandlerListenersKey = '__reactListeners$' + randomKey;
 const internalEventHandlesSetKey = '__reactHandles$' + randomKey;
 
+/**
+ * 在DOM节点上记录对应的Fiber节点
+ * 方便事件执行的时候根据DOM查找对应的Fiber节点
+ * @param {*} hostInst 
+ * @param {*} node 
+ */
 export function precacheFiberNode(
   hostInst: Fiber,
   node: Instance | TextInstance | SuspenseInstance | ReactScopeInstance,

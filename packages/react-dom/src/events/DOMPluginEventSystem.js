@@ -539,6 +539,14 @@ function isMatchingRootContainer(
   );
 }
 
+/**
+ * 收集React事件的入口
+ * @param {*} domEventName 
+ * @param {*} eventSystemFlags 
+ * @param {*} nativeEvent 
+ * @param {*} targetInst 
+ * @param {*} targetContainer 
+ */
 export function dispatchEventForPluginEventSystem(
   domEventName: DOMEventName,
   eventSystemFlags: EventSystemFlags,
