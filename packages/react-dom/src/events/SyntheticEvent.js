@@ -78,8 +78,9 @@ function createSyntheticEvent(Interface: EventInterfaceType) {
     return this;
   }
 
+  // 借助原生event对象来实现 阻止默认行为和冒泡
   Object.assign(SyntheticBaseEvent.prototype, {
-    preventDefault: function() {
+    preventDefault: function() { 
       this.defaultPrevented = true;
       const event = this.nativeEvent;
       if (!event) {

@@ -186,6 +186,7 @@ function extractEvents(
     // In the past, React has always bubbled them, but this can be surprising.
     // We're going to try aligning closer to the browser behavior by not bubbling
     // them in React either. We'll start by not bubbling onScroll, and then expand.
+    // 处理无法冒泡的事件
     const accumulateTargetOnly =
       !inCapturePhase &&
       // TODO: ideally, we'd eventually add all events from
@@ -204,6 +205,7 @@ function extractEvents(
     );
     if (listeners.length > 0) {
       // Intentionally create event lazily.
+      // 一批事件共用一个 React事件对象
       const event = new SyntheticEventCtor(
         reactName,
         reactEventType,

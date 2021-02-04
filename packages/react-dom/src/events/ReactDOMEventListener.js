@@ -277,6 +277,7 @@ export function attemptToDispatchEvent(
   // TODO: Warn if _enabled is false.
 
   const nativeEventTarget = getEventTarget(nativeEvent);
+  // 获取点击的DOM节点对应的最近的类型为HostComponnet或者HostRoot的fiber节点
   let targetInst = getClosestInstanceFromNode(nativeEventTarget);
 
   if (targetInst !== null) {

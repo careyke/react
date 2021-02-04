@@ -226,9 +226,10 @@ function executeDispatch(
   const type = event.type || 'unknown-event';
   event.currentTarget = currentTarget;
   invokeGuardedCallbackAndCatchFirstError(type, listener, undefined, event);
-  event.currentTarget = null;
+  event.currentTarget = null; // 执行完成之后需要清空 应为对象共用
 }
 
+// 按顺序执行
 function processDispatchQueueItemsInOrder(
   event: ReactSyntheticEvent,
   dispatchListeners: Array<DispatchListener>,
@@ -238,9 +239,11 @@ function processDispatchQueueItemsInOrder(
   if (inCapturePhase) {
     for (let i = dispatchListeners.length - 1; i >= 0; i--) {
       const {instance, currentTarget, listener} = dispatchListeners[i];
+      // React事件中捕获其的事件也可以阻止冒泡 向下阻止
       if (instance !== previousInstance && event.isPropagationStopped()) {
         return;
       }
+      // 这里的currentTarget指的是原生事件对象的currentTarget 也是React事件对象中的currentTarget
       executeDispatch(event, listener, currentTarget);
       previousInstance = instance;
     }
@@ -279,6 +282,7 @@ function dispatchEventsForPlugins(
 ): void {
   const nativeEventTarget = getEventTarget(nativeEvent);
   const dispatchQueue: DispatchQueue = [];
+  // 提取符合条件的回调函数
   extractEvents(
     dispatchQueue,
     domEventName,
@@ -288,6 +292,7 @@ function dispatchEventsForPlugins(
     eventSystemFlags,
     targetContainer,
   );
+  // 依次执行回调函数
   processDispatchQueue(dispatchQueue, eventSystemFlags);
 }
 
@@ -395,7 +400,7 @@ export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
       // doesn't bubble and needs to be on the document.
       if (domEventName !== 'selectionchange') {
         if (!nonDelegatedEvents.has(domEventName)) {
-          // 冒泡期
+          // 冒泡期 nonDelegatedEvents中的事件需要绑定在捕获期
           listenToNativeEvent(domEventName, false, rootContainerElement);
         }
         // 捕获期
@@ -532,6 +537,7 @@ function isMatchingRootContainer(
   grandContainer: Element,
   targetContainer: EventTarget,
 ): boolean {
+  // && 的优先级比 || 高
   return (
     grandContainer === targetContainer ||
     (grandContainer.nodeType === COMMENT_NODE &&

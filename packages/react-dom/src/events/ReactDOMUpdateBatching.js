@@ -117,6 +117,13 @@ export function flushDiscreteUpdatesIfNeeded(timeStamp: number) {
   }
 }
 
+/**
+ * 接口赋值
+ * @param {*} _batchedUpdatesImpl 
+ * @param {*} _discreteUpdatesImpl 
+ * @param {*} _flushDiscreteUpdatesImpl 
+ * @param {*} _batchedEventUpdatesImpl 
+ */
 export function setBatchingImplementation(
   _batchedUpdatesImpl,
   _discreteUpdatesImpl,
