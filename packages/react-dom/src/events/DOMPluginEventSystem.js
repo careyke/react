@@ -239,11 +239,11 @@ function processDispatchQueueItemsInOrder(
   if (inCapturePhase) {
     for (let i = dispatchListeners.length - 1; i >= 0; i--) {
       const {instance, currentTarget, listener} = dispatchListeners[i];
-      // React事件中捕获其的事件也可以阻止冒泡 向下阻止
+      // React事件中捕获期事件也可以阻止冒泡 向下阻止
       if (instance !== previousInstance && event.isPropagationStopped()) {
         return;
       }
-      // 这里的currentTarget指的是原生事件对象的currentTarget 也是React事件对象中的currentTarget
+      // 这里的currentTarget指的是React事件对象中的currentTarget
       executeDispatch(event, listener, currentTarget);
       previousInstance = instance;
     }
