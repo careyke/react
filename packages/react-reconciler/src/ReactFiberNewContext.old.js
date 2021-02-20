@@ -368,7 +368,7 @@ export function readContext<T>(
       // This is the first dependency for this component. Create a new list.
       lastContextDependency = contextItem;
       currentlyRenderingFiber.dependencies = {
-        lanes: NoLanes,
+        lanes: NoLanes, // 判断依赖的context是否有更新
         firstContext: contextItem,
         responders: null,
       };

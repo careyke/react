@@ -59,6 +59,8 @@ function pop<T>(cursor: StackCursor<T>, fiber: Fiber): void {
 function push<T>(cursor: StackCursor<T>, value: T, fiber: Fiber): void {
   index++;
 
+  // 如果current是基本类型的值，valueStack中存储的值有点问题
+  // 后面更新不上
   valueStack[index] = cursor.current;
 
   if (__DEV__) {

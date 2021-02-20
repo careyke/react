@@ -570,6 +570,7 @@ function checkClassInstance(workInProgress: Fiber, ctor: any, newProps: any) {
  */
 function adoptClassInstance(workInProgress: Fiber, instance: any): void {
   instance.updater = classComponentUpdater;
+  // 设置ClassComponnet的stateNode
   workInProgress.stateNode = instance;
   // The instance needs access to the fiber so that it can schedule updates
   setInstance(instance, workInProgress);

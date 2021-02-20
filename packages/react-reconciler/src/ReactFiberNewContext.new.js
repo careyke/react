@@ -196,7 +196,7 @@ export function propagateContextChange(
     // Visit this fiber.
     const list = fiber.dependencies;
     if (list !== null) {
-      nextFiber = fiber.child;
+      nextFiber = fiber.child; // 定位到Consumer的子元素
 
       let dependency = list.firstContext;
       while (dependency !== null) {
@@ -220,6 +220,7 @@ export function propagateContextChange(
             // worth fixing.
             enqueueUpdate(fiber, update);
           }
+          // 确保本次更新能够重新渲染这个节点
           fiber.lanes = mergeLanes(fiber.lanes, renderLanes);
           const alternate = fiber.alternate;
           if (alternate !== null) {
@@ -311,7 +312,7 @@ export function prepareToReadContext(
         markWorkInProgressReceivedUpdate();
       }
       // Reset the work-in-progress list
-      dependencies.firstContext = null;
+      dependencies.firstContext = null; // 清空数据，后面会重置
     }
   }
 }
