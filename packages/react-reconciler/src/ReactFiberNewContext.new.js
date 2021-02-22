@@ -196,7 +196,7 @@ export function propagateContextChange(
     // Visit this fiber.
     const list = fiber.dependencies;
     if (list !== null) {
-      nextFiber = fiber.child; // 定位到Consumer的子元素
+      nextFiber = fiber.child; 
 
       let dependency = list.firstContext;
       while (dependency !== null) {

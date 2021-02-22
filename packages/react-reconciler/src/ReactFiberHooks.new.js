@@ -346,6 +346,7 @@ export function renderWithHooks<Props, SecondArg>(
       current !== null && current.type !== workInProgress.type;
   }
 
+  // 每次都从currentFiber中clone以下数据
   workInProgress.memoizedState = null;
   workInProgress.updateQueue = null;
   workInProgress.lanes = NoLanes;
