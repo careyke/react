@@ -96,7 +96,7 @@ export {
   REACT_PROFILER_TYPE as Profiler,
   REACT_STRICT_MODE_TYPE as StrictMode,
   REACT_DEBUG_TRACING_MODE_TYPE as unstable_DebugTracingMode,
-  REACT_SUSPENSE_TYPE as Suspense,
+  REACT_SUSPENSE_TYPE as Suspense, // 这里可以看到到处去的Suspense其实就是一个常量，用来标记组件的类型，体现在ReactElement中的type字段中，本事上和HostComponent是一样的
   createElement,
   cloneElement,
   isValidElement,
