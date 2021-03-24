@@ -2914,6 +2914,13 @@ export function captureCommitPhaseError(sourceFiber: Fiber, error: mixed) {
   }
 }
 
+/**
+ * Suspense后面promise的回调函数
+ * 这里在请求回来之后会刷新
+ * @param {*} root 
+ * @param {*} wakeable 
+ * @param {*} pingedLanes 
+ */
 export function pingSuspendedRoot(
   root: FiberRoot,
   wakeable: Wakeable,

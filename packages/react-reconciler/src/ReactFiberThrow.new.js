@@ -151,6 +151,13 @@ function createClassErrorUpdate(
   return update;
 }
 
+/**
+ * 给Suspense后代节点中抛出来的promise增加回调函数
+ * 控制刷新
+ * @param {*} root 
+ * @param {*} wakeable 
+ * @param {*} lanes 
+ */
 function attachPingListener(root: FiberRoot, wakeable: Wakeable, lanes: Lanes) {
   // Attach a listener to the promise to "ping" the root and retry. But only if
   // one does not already exist for the lanes we're currently rendering (which
@@ -230,6 +237,7 @@ function throwException(
 
     // Schedule the nearest Suspense to re-render the timed out view.
     let workInProgress = returnFiber;
+    // 向上寻找最近的Suspense节点
     do {
       if (
         workInProgress.tag === SuspenseComponent &&
