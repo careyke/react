@@ -1798,6 +1798,9 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
       // This fiber did not complete because something threw. Pop values off
       // the stack without entering the complete phase. If this is a boundary,
       // capture values if possible.
+      /**
+       * Suspense中 fiber并没有完成，借助CompleteUnitWork，依次向上查找匹配的Suspense
+       */
       const next = unwindWork(completedWork, subtreeRenderLanes);
 
       // Because this fiber did not complete, don't reset its expiration time.

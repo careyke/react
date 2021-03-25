@@ -98,6 +98,9 @@ function unwindWork(workInProgress: Fiber, renderLanes: Lanes) {
       }
       const flags = workInProgress.flags;
       if (flags & ShouldCapture) {
+        /**
+         * 捕获一个Suspense组件，需要重新渲染成fallback
+         */
         workInProgress.flags = (flags & ~ShouldCapture) | DidCapture;
         // Captured a suspense effect. Re-render the boundary.
         if (
