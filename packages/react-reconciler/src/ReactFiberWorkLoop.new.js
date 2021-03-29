@@ -920,6 +920,7 @@ function finishConcurrentRender(root, exitStatus, lanes) {
           globalMostRecentFallbackTime + FALLBACK_THROTTLE_MS - now();
         // Don't bother with a very short suspense time.
         if (msUntilTimeout > 10) {
+          // 相邻两次suspend的时间间隔太短，交互不优化，处理优化
           const nextLanes = getNextLanes(root, NoLanes);
           if (nextLanes !== NoLanes) {
             // There's additional work on this root.
@@ -2927,7 +2928,11 @@ export function captureCommitPhaseError(sourceFiber: Fiber, error: mixed) {
 }
 
 /**
- * （？？）
+ * 非legacy模式中
+ * 对于Suspense中promise的优化处理
+ * 当promise在render阶段完成的时候，期望可以优化为重新执行一次render阶段，吞掉fallback的出现
+ * 但是优化的条件比较苛刻
+ * 需要构造节点比较多的demo才能复现
  * @param {*} root 
  * @param {*} wakeable 
  * @param {*} pingedLanes 

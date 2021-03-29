@@ -272,11 +272,13 @@ export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
     if (nonIdlePendingLanes !== NoLanes) {
       const nonIdleUnblockedLanes = nonIdlePendingLanes & ~suspendedLanes;
       if (nonIdleUnblockedLanes !== NoLanes) {
+        // 先处理非suspended的任务
         nextLanes = getHighestPriorityLanes(nonIdleUnblockedLanes);
         nextLanePriority = return_highestLanePriority;
       } else {
         const nonIdlePingedLanes = nonIdlePendingLanes & pingedLanes;
         if (nonIdlePingedLanes !== NoLanes) {
+          // 对于suspended，先处理其中pinded的任务
           nextLanes = getHighestPriorityLanes(nonIdlePingedLanes);
           nextLanePriority = return_highestLanePriority;
         }
@@ -689,11 +691,13 @@ export function markRootUpdated(
   // those updates as parallel.
 
   // Unsuspend any update at equal or lower priority.
-  /**
-   * 
-   */
+  
   const higherPriorityLanes = updateLane - 1; // Turns 0b1000 into 0b0111
 
+  /**
+   * 清理suspendedLanes和pingedLanes
+   * 降低处理的优先级
+   */
   root.suspendedLanes &= higherPriorityLanes;
   root.pingedLanes &= higherPriorityLanes;
 
@@ -709,7 +713,12 @@ export function markRootSuspended(root: FiberRoot, suspendedLanes: Lanes) {
   root.pingedLanes &= ~suspendedLanes;
 
   // The suspended lanes are no longer CPU-bound. Clear their expiration times.
-  // 清除suspendedLanes的过期时间，不受CPU的限制，后续在commit阶段有防饿死的机制（？？）
+  /**
+   * suspendedLane中的lane处理的逻辑比较特殊
+   * 表示的是在某个优先级渲染时出现了suspebded
+   * suspendedLanes中包含的更新处理的优先级很低，在设计上不受CPU的限制
+   * 不会饿死，Suspense的更新由RetryLane来管理
+   */
   const expirationTimes = root.expirationTimes;
   let lanes = suspendedLanes;
   while (lanes > 0) {
