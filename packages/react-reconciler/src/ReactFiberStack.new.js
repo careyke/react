@@ -56,11 +56,20 @@ function pop<T>(cursor: StackCursor<T>, fiber: Fiber): void {
   index--;
 }
 
+/**
+ * 这个文件的功能就是提供一个 栈结构 来保存一些调用数据
+ * 其中cursor.current保存的是当前的值，不在栈中
+ * index表示栈顶元素的索引
+ * 
+ * 有一个疑问 这里index是当前模块作用域中的 不同的cursor用的都是同一个index，不会导致数据不一致吗？
+ * 除非能够入栈和出栈的顺序能够一一对应上
+ * @param {*} cursor 
+ * @param {*} value 
+ * @param {*} fiber 
+ */
 function push<T>(cursor: StackCursor<T>, value: T, fiber: Fiber): void {
   index++;
 
-  // 如果current是基本类型的值，valueStack中存储的值有点问题
-  // 后面更新不上
   valueStack[index] = cursor.current;
 
   if (__DEV__) {

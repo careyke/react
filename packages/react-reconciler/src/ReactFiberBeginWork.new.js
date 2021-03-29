@@ -1632,7 +1632,7 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
     // Something in this boundary's subtree already suspended. Switch to
     // rendering the fallback children.
     showFallback = true;
-    workInProgress.flags &= ~DidCapture;
+    workInProgress.flags &= ~DidCapture; // DidCapture在这里被消耗掉了
   } else {
     // Attempting the main content
     if (
@@ -1719,6 +1719,13 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
         renderLanes,
       );
       workInProgress.memoizedState = SUSPENDED_MARKER;
+      /**
+       * 这里有一个细节需要注意一下！！！
+       * 在suspended状态的时候，SuspenseFiber执行beginWork返回的是fallback fiber
+       * 而且fallback fiber是子节点中的最后一个节点
+       * 也就意味着在completeWork阶段，并不会执行Offscreen节点，从而达到不渲染真实子节点的目的
+       * 但是Offscreen Fiber在fiber树中是存在的
+      */
       return fallbackFragment;
     } else if (typeof nextProps.unstable_expectedLoadTime === 'number') {
       // This is a CPU-bound tree. Skip this tree and show a placeholder to
@@ -1830,6 +1837,10 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
           current,
           renderLanes,
         );
+        /**
+         * 表示当前渲染的是fallback节点
+         * 打上标记，completeWork中会消费这个数据
+        */
         workInProgress.memoizedState = SUSPENDED_MARKER;
         return fallbackChildFragment;
       } else {
@@ -1840,7 +1851,12 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
           nextPrimaryChildren,
           renderLanes,
         );
-        workInProgress.memoizedState = null;
+        /**
+         * 表示当前渲染的是真实的子节点
+         * 
+         * 这里使用memoizedState来记录当前Suspense的内部渲染状态，虽然和常规的Fiber节点不一样，但是很合理
+        */
+        workInProgress.memoizedState = null; 
         return primaryChildFragment;
       }
     } else {
@@ -1898,6 +1914,9 @@ function mountSuspensePrimaryChildren(
     mode: 'visible',
     children: primaryChildren,
   };
+  /** 
+   * 创建一个离屏节点 用来保存真实的子节点
+  */
   const primaryChildFragment = createFiberFromOffscreen(
     primaryChildProps,
     mode,
@@ -1956,6 +1975,7 @@ function mountSuspenseFallbackChildren(
       NoLanes,
       null,
     );
+    // fallback 被包裹在一个Fragment中
     fallbackChildFragment = createFiberFromFragment(
       fallbackChildren,
       mode,
@@ -1967,6 +1987,7 @@ function mountSuspenseFallbackChildren(
   primaryChildFragment.return = workInProgress;
   fallbackChildFragment.return = workInProgress;
   primaryChildFragment.sibling = fallbackChildFragment;
+  // 这里渲染fallback节点的时候，仍然会存在离屏节点
   workInProgress.child = primaryChildFragment;
   return fallbackChildFragment;
 }
@@ -2001,6 +2022,7 @@ function updateSuspensePrimaryChildren(
     primaryChildFragment.lanes = renderLanes;
   }
   primaryChildFragment.return = workInProgress;
+  // 删除fallback节点
   primaryChildFragment.sibling = null;
   if (currentFallbackChildFragment !== null) {
     // Delete the fallback child fragment

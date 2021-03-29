@@ -659,6 +659,12 @@ export function scheduleUpdateOnFiber(
 // work without treating it as a typical update that originates from an event;
 // e.g. retrying a Suspense boundary isn't an update, but it does schedule work
 // on a fiber.
+/**
+ * 给当前fiber及其祖先节点都加上当前lane，包括alternate节点
+ * @param {*} sourceFiber 
+ * @param {*} lane 
+ * @returns 
+ */
 function markUpdateLaneFromFiberToRoot(
   sourceFiber: Fiber,
   lane: Lane,
@@ -1749,6 +1755,9 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
 
       if (next !== null) {
         // Completing this fiber spawned new work. Work on that next.
+        /**
+         * 1. legacy模式下，Suspense节点会走在这里来触发重渲染
+         */
         workInProgress = next;
         return;
       }
@@ -2918,8 +2927,7 @@ export function captureCommitPhaseError(sourceFiber: Fiber, error: mixed) {
 }
 
 /**
- * Suspense后面promise的回调函数
- * 这里在请求回来之后会刷新
+ * （？？）
  * @param {*} root 
  * @param {*} wakeable 
  * @param {*} pingedLanes 
@@ -2980,6 +2988,7 @@ function retryTimedOutBoundary(boundaryFiber: Fiber, retryLane: Lane) {
   // suspended it has resolved, which means at least part of the tree was
   // likely unblocked. Try rendering again, at a new expiration time.
   if (retryLane === NoLane) {
+    // 获取本次更新的轨道lane
     retryLane = requestRetryLane(boundaryFiber);
   }
   // TODO: Special case idle priority?

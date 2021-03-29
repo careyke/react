@@ -713,7 +713,7 @@ function completeWork(
       } else {
         /**
          * 将新增的节点对应的真实DOM节点组装成一个DOM子树
-         * 但是这个子树在Reconciler节点不加入DOM组数中
+         * 但是这个子树在Reconciler阶段不加入DOM树中
          * 而是在Commit阶段再加入
          */
         if (!newProps) {
@@ -855,6 +855,11 @@ function completeWork(
       }
 
       if ((workInProgress.flags & DidCapture) !== NoFlags) {
+        /**
+         * Suspense Fiber有DidCapture这个flag，表明这个节点后代有异常抛出，需要捕获。
+         * 重新渲染Suspense节点
+         * legacy模式下会走这段逻辑，非legacy模式会走unwindWork来触发重新执行Suspense
+         */
         // Something suspended. Re-render with the fallback children.
         workInProgress.lanes = renderLanes;
         // Do not reset the effect list.
@@ -867,8 +872,8 @@ function completeWork(
         return workInProgress;
       }
 
-      const nextDidTimeout = nextState !== null;
-      let prevDidTimeout = false;
+      const nextDidTimeout = nextState !== null; // 本次渲染是否是暂停渲染，也就是渲染fallback
+      let prevDidTimeout = false; // 上次渲染是否是暂停渲染，也就是渲染fallback
       if (current === null) {
         if (workInProgress.memoizedProps.fallback !== undefined) {
           popHydrationState(workInProgress);

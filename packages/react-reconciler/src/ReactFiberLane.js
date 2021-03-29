@@ -408,6 +408,12 @@ function computeExpirationTime(lane: Lane, currentTime: number) {
   }
 }
 
+/**
+ * 记录每种lane的过期时间 
+ * 防止饿死
+ * @param {*} root 
+ * @param {*} currentTime 
+ */
 export function markStarvedLanesAsExpired(
   root: FiberRoot,
   currentTime: number,
@@ -578,6 +584,13 @@ export function findRetryLane(wipLanes: Lanes): Lane {
   return lane;
 }
 
+/**
+ * a : 00001111             15
+ * -a: 11110000 -> 11110001   -15
+ * 获取最右边的非0的lane
+ * @param {*} lanes 
+ * @returns 
+ */
 function getHighestPriorityLane(lanes: Lanes) {
   return lanes & -lanes;
 }
@@ -600,6 +613,12 @@ export function pickArbitraryLane(lanes: Lanes): Lane {
   return getHighestPriorityLane(lanes);
 }
 
+/**
+ * 返回最左边的非0位置的索引
+ * 索引从右开始数，从0开始
+ * @param {*} lanes 
+ * @returns 
+ */
 function pickArbitraryLaneIndex(lanes: Lanes) {
   return 31 - clz32(lanes);
 }
@@ -670,6 +689,9 @@ export function markRootUpdated(
   // those updates as parallel.
 
   // Unsuspend any update at equal or lower priority.
+  /**
+   * 
+   */
   const higherPriorityLanes = updateLane - 1; // Turns 0b1000 into 0b0111
 
   root.suspendedLanes &= higherPriorityLanes;
@@ -687,6 +709,7 @@ export function markRootSuspended(root: FiberRoot, suspendedLanes: Lanes) {
   root.pingedLanes &= ~suspendedLanes;
 
   // The suspended lanes are no longer CPU-bound. Clear their expiration times.
+  // 清除suspendedLanes的过期时间，不受CPU的限制，后续在commit阶段有防饿死的机制（？？）
   const expirationTimes = root.expirationTimes;
   let lanes = suspendedLanes;
   while (lanes > 0) {

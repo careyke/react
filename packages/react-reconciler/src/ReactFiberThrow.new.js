@@ -247,6 +247,13 @@ function throwException(
 
         // Stash the promise on the boundary fiber. If the boundary times out, we'll
         // attach another listener to flip the boundary back to its normal state.
+        /**
+         * 这里会在SuspenseFiber中保存其后代的promise，
+         * 会在commit阶段来处理
+         * 防止在Concurrent模式中出现Suspense任务饿死的情况
+         * 
+         * legacy模式下会直接在commit阶段来处理promise触发重渲染
+         */
         const wakeables: Set<Wakeable> = (workInProgress.updateQueue: any);
         if (wakeables === null) {
           const updateQueue = (new Set(): any);
@@ -265,12 +272,20 @@ function throwException(
         // inside a blocking mode tree. If the Suspense is outside of it, we
         // should *not* suspend the commit.
         if ((workInProgress.mode & BlockingMode) === NoMode) {
+          /**
+           * legacy模式下的特殊处理
+           * 直接在这里给Suspense Fiber加上DidCapture flag
+           */
           workInProgress.flags |= DidCapture;
           sourceFiber.flags |= ForceUpdateForLegacySuspense;
 
           // We're going to commit this fiber even though it didn't complete.
           // But we shouldn't call any lifecycle methods or callbacks. Remove
           // all lifecycle effect tags.
+          /**
+           * legacy模式下，sourceFiber去掉Incomplete和生命周期相关的flag 
+           * 也就是抛出异常的时候不触发生命周期
+           */
           sourceFiber.flags &= ~(LifecycleEffectMask | Incomplete);
 
           if (sourceFiber.tag === ClassComponent) {

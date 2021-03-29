@@ -99,6 +99,7 @@ function unwindWork(workInProgress: Fiber, renderLanes: Lanes) {
       const flags = workInProgress.flags;
       if (flags & ShouldCapture) {
         /**
+         * 非legacy模式中，在这里加上DidCapture flag
          * 捕获一个Suspense组件，需要重新渲染成fallback
          */
         workInProgress.flags = (flags & ~ShouldCapture) | DidCapture;

@@ -1785,6 +1785,11 @@ function commitSuspenseHydrationCallbacks(
   }
 }
 
+/**
+ * Suspense 重新渲染的入口方法
+ * 非legacy模式有其他的处理逻辑
+ * @param {*} finishedWork 
+ */
 function attachSuspenseRetryListeners(finishedWork: Fiber) {
   // If this boundary just timed out, then it will have a set of wakeables.
   // For each wakeable, attach a listener so that when it resolves, React
@@ -1796,6 +1801,10 @@ function attachSuspenseRetryListeners(finishedWork: Fiber) {
     if (retryCache === null) {
       retryCache = finishedWork.stateNode = new PossiblyWeakSet();
     }
+    /**
+     * 收集未完成的promise
+     * 保存在Suspense fiber的stateNode中
+     */
     wakeables.forEach(wakeable => {
       // Memoize using the boundary fiber to prevent redundant listeners.
       let retry = resolveRetryWakeable.bind(null, finishedWork, wakeable);
