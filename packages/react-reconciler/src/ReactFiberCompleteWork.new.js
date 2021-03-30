@@ -909,6 +909,10 @@ function completeWork(
           ) {
             // If this was in an invisible tree or a new render, then showing
             // this boundary is ok.
+            /**
+             * 1. 第一次渲染
+             * 2. 在hidden状态的Offsreen节点内部渲染，也就是在invisibleSuspenseContext中
+             */
             renderDidSuspend();
           } else {
             // Otherwise, we're going to have to hide content so we should
@@ -916,6 +920,7 @@ function completeWork(
             /**
              * 在update阶段，Suspense由primary变成suspended状态
              * 为了防止loading闪烁，配合pingSuspendedRoot做了一些优化
+             * 
              * 感觉有点类似于内部调用了一次 useTransition (?)
              */
             renderDidSuspendDelayIfPossible();
