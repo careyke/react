@@ -846,6 +846,7 @@ function hideOrUnhideAllChildren(finishedWork, isHidden) {
         node = node.child;
         continue;
       }
+
       if (node === finishedWork) {
         return;
       }
@@ -1705,6 +1706,12 @@ function commitWork(current: Fiber | null, finishedWork: Fiber): void {
     }
     case OffscreenComponent:
     case LegacyHiddenComponent: {
+      /**
+       * 这里重新显示之前隐藏的DOM节点
+       * OffscreenFiber.memoizedState 也可以用来判断当前Suspense处于什么状态
+       * 如果不为null，表示处于suspended状态，需要隐藏
+       * （但是OffscreenComponent的隐藏不在这里），显示是这里
+       */
       const newState: OffscreenState | null = finishedWork.memoizedState;
       const isHidden = newState !== null;
       hideOrUnhideAllChildren(finishedWork, isHidden);
@@ -1735,6 +1742,11 @@ function commitSuspenseComponent(finishedWork: Fiber) {
       // simpler if we got rid of the effect list and traversed the tree, like
       // we're planning to do.
       const primaryChildParent: Fiber = (finishedWork.child: any);
+      /**
+       * 在update阶段，当Suspense状态变化的时候（变成suspended），并不会销毁Offscreen Fiber的子节点
+       * 而是在这里手动隐藏或者重现真实子元素
+       * 可以看到 暂时只做了隐藏，重现走beginWork中的逻辑
+       */
       hideOrUnhideAllChildren(primaryChildParent, true);
     }
   }

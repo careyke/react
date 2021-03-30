@@ -626,6 +626,7 @@ function updateOffscreenComponent(
     if (prevState !== null) {
       subtreeRenderLanes = mergeLanes(prevState.baseLanes, renderLanes);
       // Since we're not hidden anymore, reset the state
+      // 运行到这里说明不需要隐藏，需要清空判断变量
       workInProgress.memoizedState = null;
     } else {
       // We weren't previously hidden, and we still aren't, so there's nothing
@@ -1639,6 +1640,10 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
       current === null ||
       (current.memoizedState: null | SuspenseState) !== null
     ) {
+      /**
+       * 这里表明当前Suspense是mount阶段，
+       * 或者当前正处于suspended状态
+       */
       // This is a new mount or this boundary is already showing a fallback state.
       // Mark this subtree context as having at least one invisible parent that could
       // handle the fallback state.
@@ -1969,6 +1974,8 @@ function mountSuspenseFallbackChildren(
       null,
     );
   } else {
+    // 注意这里重新创建了一个Offscreen,并没有重用之前的fiber节点
+    // 所以mount阶段 OffScreen Fiber并没有子节点
     primaryChildFragment = createFiberFromOffscreen(
       primaryChildProps,
       mode,
@@ -2099,6 +2106,7 @@ function updateSuspenseFallbackChildren(
       workInProgress.firstEffect = workInProgress.lastEffect = null;
     }
   } else {
+    // update阶段，重用了之前的Offscreen Fiber节点
     primaryChildFragment = createWorkInProgressOffscreenFiber(
       currentPrimaryChildFragment,
       primaryChildProps,

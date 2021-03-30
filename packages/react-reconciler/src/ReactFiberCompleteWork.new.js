@@ -913,6 +913,11 @@ function completeWork(
           } else {
             // Otherwise, we're going to have to hide content so we should
             // suspend for longer if possible.
+            /**
+             * 在update阶段，Suspense由primary变成suspended状态
+             * 为了防止loading闪烁，配合pingSuspendedRoot做了一些优化
+             * 感觉有点类似于内部调用了一次 useTransition (?)
+             */
             renderDidSuspendDelayIfPossible();
           }
         }

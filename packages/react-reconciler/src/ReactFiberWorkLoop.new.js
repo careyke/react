@@ -916,11 +916,16 @@ function finishConcurrentRender(root, exitStatus, lanes) {
       ) {
         // This render only included retries, no updates. Throttle committing
         // retries so that we don't show too many loading states too quickly.
+        /**
+         * loading节流显示
+         * 这种场景会出现在Suspense多层次嵌套的场景，初始渲染的时候可能会出现快速出现多个loading的情况
+         * 优化体验
+         */
         const msUntilTimeout =
           globalMostRecentFallbackTime + FALLBACK_THROTTLE_MS - now();
         // Don't bother with a very short suspense time.
         if (msUntilTimeout > 10) {
-          // 相邻两次suspend的时间间隔太短，交互不优化，处理优化
+          // 相邻两次suspend的时间间隔太短，交互优化，loading节流
           const nextLanes = getNextLanes(root, NoLanes);
           if (nextLanes !== NoLanes) {
             // There's additional work on this root.
@@ -2930,7 +2935,7 @@ export function captureCommitPhaseError(sourceFiber: Fiber, error: mixed) {
 /**
  * 非legacy模式中
  * 对于Suspense中promise的优化处理
- * 当promise在render阶段完成的时候，期望可以优化为重新执行一次render阶段，吞掉fallback的出现
+ * 当promise在render阶段完成的时候，期望可以优化为重新执行一次render阶段，用来吞掉“闪烁”的fallback
  * 但是优化的条件比较苛刻
  * 需要构造节点比较多的demo才能复现
  * @param {*} root 
@@ -2972,6 +2977,11 @@ export function pingSuspendedRoot(
         now() - globalMostRecentFallbackTime < FALLBACK_THROTTLE_MS)
     ) {
       // Restart from the root.
+      /**
+       * 1. 在update阶段，Suspense由primary变成suspended的时候。
+       *    优化之后不会走commit中的promise.then，因为Suspense节点前后没有变化，不在effectList中（有例子证明）
+       * 2. 在retry过程中，在loading节流限制时间之内触发了 Suspense loading 
+       */
       prepareFreshStack(root, NoLanes);
     } else {
       // Even though we can't restart right now, we might get an

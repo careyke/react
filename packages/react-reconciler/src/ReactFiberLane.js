@@ -695,8 +695,7 @@ export function markRootUpdated(
   const higherPriorityLanes = updateLane - 1; // Turns 0b1000 into 0b0111
 
   /**
-   * 清理suspendedLanes和pingedLanes
-   * 降低处理的优先级
+   * 去掉所有低优的suspendedLanes和pingedLanes
    */
   root.suspendedLanes &= higherPriorityLanes;
   root.pingedLanes &= higherPriorityLanes;
