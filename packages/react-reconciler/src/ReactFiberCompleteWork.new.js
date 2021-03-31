@@ -1287,7 +1287,7 @@ function completeWork(
           prevIsHidden !== nextIsHidden &&
           newProps.mode !== 'unstable-defer-without-hiding'
         ) {
-          workInProgress.flags |= Update;
+          workInProgress.flags |= Update; // Offscreen中的内容显示出来
         }
       }
       return null;

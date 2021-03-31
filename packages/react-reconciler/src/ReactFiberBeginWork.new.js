@@ -1619,6 +1619,11 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
   let suspenseContext: SuspenseContext = suspenseStackCursor.current;
 
   let showFallback = false;
+  /** 
+   * 这里有一个很重要的细节
+   * 当前Suspense后代promise没有完成时，该Suspense始终会是suspended状态，也就是一直会有DidCapture flag
+   * 可以很好的规避在切换请求之后，就请求在新请求之前响应导致内容闪烁的场景
+  */
   const didSuspend = (workInProgress.flags & DidCapture) !== NoFlags;
 
   if (
