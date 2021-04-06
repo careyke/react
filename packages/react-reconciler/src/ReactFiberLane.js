@@ -765,6 +765,8 @@ export function markRootFinished(root: FiberRoot, remainingLanes: Lanes) {
   root.pendingLanes = remainingLanes;
 
   // Let's try everything again
+  // suspendedLanes和pingedLanes每次commit之后就会重置
+  // 不会保留到下次更新
   root.suspendedLanes = 0;
   root.pingedLanes = 0;
 

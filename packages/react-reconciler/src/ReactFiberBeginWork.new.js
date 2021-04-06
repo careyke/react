@@ -1718,6 +1718,9 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
     const nextPrimaryChildren = nextProps.children;
     const nextFallbackChildren = nextProps.fallback;
     if (showFallback) {
+      // mountSuspenseFallbackChildren这个方法会销毁primaryChildFragment
+      // 但是在update阶段调用的是mountSuspenseFallbackChildren，
+      // 这个方法不会销毁primaryChild，所以需要在commit节点手动隐藏
       const fallbackFragment = mountSuspenseFallbackChildren(
         workInProgress,
         nextPrimaryChildren,

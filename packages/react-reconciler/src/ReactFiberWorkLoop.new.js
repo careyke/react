@@ -1364,6 +1364,9 @@ function prepareFreshStack(root: FiberRoot, lanes: Lanes) {
 
   const timeoutHandle = root.timeoutHandle;
   if (timeoutHandle !== noTimeout) {
+    /**
+     * 下一次渲染开始的时候，先清空之前暂存的延时commit
+     */
     // The root previous suspended and scheduled a timeout to commit a fallback
     // state. Now that we have additional work, cancel the timeout.
     root.timeoutHandle = noTimeout;
