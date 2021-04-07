@@ -939,6 +939,9 @@ function completeWork(
       }
       if (supportsMutation) {
         // TODO: Only schedule updates if these values are non equal, i.e. it changed.
+        // 这个地方并不能直接修改成 (nextDidTimeout !== prevDidTimeout)
+        // 因为有可能出现前后状态都是suspended，但是promise不一致的场景
+        // 如果修改的话，这种场景会导致新的promise没有绑定then来更新状态，导致更新出错
         if (nextDidTimeout || prevDidTimeout) {
           // If this boundary just timed out, schedule an effect to attach a
           // retry listener to the promise. This flag is also used to hide the
