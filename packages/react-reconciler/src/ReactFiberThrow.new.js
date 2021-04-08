@@ -250,9 +250,6 @@ function throwException(
         /**
          * 这里会在SuspenseFiber中保存其后代的promise，
          * 会在commit阶段来处理
-         * 防止在Concurrent模式中出现Suspense任务饿死的情况
-         * 
-         * legacy模式下会直接在commit阶段来处理promise触发重渲染
          */
         const wakeables: Set<Wakeable> = (workInProgress.updateQueue: any);
         if (wakeables === null) {
