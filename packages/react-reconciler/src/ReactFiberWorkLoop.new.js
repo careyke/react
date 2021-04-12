@@ -2982,7 +2982,6 @@ export function pingSuspendedRoot(
       // Restart from the root.
       /**
        * 1. 在update阶段，Suspense由primary变成suspended的时候。
-       *    优化之后不会走commit中的promise.then，因为Suspense节点前后没有变化，不在effectList中（有例子证明）
        * 2. 在retry过程中，在loading节流限制时间之内触发了 Suspense loading 
        */
       prepareFreshStack(root, NoLanes);
