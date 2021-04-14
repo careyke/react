@@ -385,9 +385,11 @@ function getStateFromUpdate<State>(
       }
       if (partialState === null || partialState === undefined) {
         // Null and undefined are treated as no-ops.
+        // 函数类型的值 返回值是null或者undefined会不更新
         return prevState;
       }
       // Merge the partial state and the previous state.
+      // 注意：设置旧值仍然会更新
       return Object.assign({}, prevState, partialState);
     }
     case ForceUpdate: {
