@@ -963,6 +963,7 @@ function finishConcurrentRender(root, exitStatus, lanes) {
         // This is a transition, so we should exit without committing a
         // placeholder and without scheduling a timeout. Delay indefinitely
         // until we receive more data.
+        // 配合useTransition优化
         break;
       }
 
@@ -2941,6 +2942,8 @@ export function captureCommitPhaseError(sourceFiber: Fiber, error: mixed) {
  * 当promise在render阶段完成的时候，期望可以优化为重新执行一次render阶段，用来吞掉“闪烁”的fallback
  * 但是优化的条件比较苛刻
  * 需要构造节点比较多的demo才能复现
+ * 
+ * 在useTransition优化的时候，由于不会进入commit阶段，所以由这个回调函数来触发更新
  * @param {*} root 
  * @param {*} wakeable 
  * @param {*} pingedLanes 
