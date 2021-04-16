@@ -713,10 +713,10 @@ export function markRootSuspended(root: FiberRoot, suspendedLanes: Lanes) {
 
   // The suspended lanes are no longer CPU-bound. Clear their expiration times.
   /**
-   * suspendedLane中的lane处理的逻辑比较特殊
-   * 表示的是在某个优先级渲染时出现了suspebded
-   * suspendedLanes中包含的更新处理的优先级很低，在设计上不受CPU的限制
-   * 不会饿死，Suspense的更新由RetryLane来管理
+   * 这个将suspendedLanes中每个lane对应的过期时间去掉了
+   * 表示的是Suspense的更新不受CPU影响？？ （有点没有理解） 虽然Suspense的更新确实是受I/O的影响
+   * 
+   * 感觉在useTransition优化Suspense那里可能有点意义（？？？？？）
    */
   const expirationTimes = root.expirationTimes;
   let lanes = suspendedLanes;

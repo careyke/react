@@ -1762,6 +1762,7 @@ function dispatchAction<S, A>(
     didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
   } else {
     if (
+      // 当前fiber没有更新的state
       fiber.lanes === NoLanes &&
       (alternate === null || alternate.lanes === NoLanes)
     ) {
