@@ -469,6 +469,8 @@ export function bailoutHooks(
   lanes: Lanes,
 ) {
   workInProgress.updateQueue = current.updateQueue;
+  // 这里是创建后优化，此时FunctionComponent已经执行，有可能会产生PassiveEffect和UpdateEffect
+  // 所以需要清除
   workInProgress.flags &= ~(PassiveEffect | UpdateEffect);
   current.lanes = removeLanes(current.lanes, lanes);
 }
