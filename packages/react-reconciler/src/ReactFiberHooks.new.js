@@ -1761,6 +1761,7 @@ function dispatchAction<S, A>(
     // and apply the stashed updates on top of the work-in-progress hook.
     // 在FunctionComponent函数体中直接调用setState
     // 优化处理 收归到本次更新中
+    // 正常情况下 这个函数中currentlyRenderingFiber为null
     didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
   } else {
     if (

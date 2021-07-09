@@ -1045,7 +1045,7 @@ function commitUnmount(
 }
 
 /**
- * 给当前节点嵌套的所有字节点执行commitUnmount
+ * 给当前节点嵌套的所有后代节点执行commitUnmount
  * 
  * @param {*} finishedRoot 
  * @param {*} root 
