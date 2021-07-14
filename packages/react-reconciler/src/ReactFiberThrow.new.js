@@ -177,6 +177,7 @@ function attachPingListener(root: FiberRoot, wakeable: Wakeable, lanes: Lanes) {
   }
   if (!threadIDs.has(lanes)) {
     // Memoize using the thread ID to prevent redundant listeners.
+    // 防止冗余侦听器
     threadIDs.add(lanes);
     const ping = pingSuspendedRoot.bind(null, root, wakeable, lanes);
     wakeable.then(ping, ping);

@@ -276,9 +276,9 @@ export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
         nextLanes = getHighestPriorityLanes(nonIdleUnblockedLanes);
         nextLanePriority = return_highestLanePriority;
       } else {
+        // suspendedLanes中的任务 只能通过pingedLanes来调度
         const nonIdlePingedLanes = nonIdlePendingLanes & pingedLanes;
         if (nonIdlePingedLanes !== NoLanes) {
-          // 对于suspended，先处理其中pinded的任务
           nextLanes = getHighestPriorityLanes(nonIdlePingedLanes);
           nextLanePriority = return_highestLanePriority;
         }
@@ -714,9 +714,8 @@ export function markRootSuspended(root: FiberRoot, suspendedLanes: Lanes) {
   // The suspended lanes are no longer CPU-bound. Clear their expiration times.
   /**
    * 这个将suspendedLanes中每个lane对应的过期时间去掉了
-   * 表示的是Suspense的更新不受CPU影响？？ （有点没有理解） 虽然Suspense的更新确实是受I/O的影响
-   * 
-   * 感觉在useTransition优化Suspense那里可能有点意义（？？？？？）
+	 * 表示suspendedLanes中的lanes不会自动调度执行，需要借助于pingedLanes来执行
+	 * 所以不需要过期时间
    */
   const expirationTimes = root.expirationTimes;
   let lanes = suspendedLanes;
